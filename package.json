@@ -1,0 +1,30 @@
+{
+  "name": "assetinjector",
+  "version": "0.0.0",
+  "description": "Inject assets from a folder into a source file.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test.js"
+  },
+  "keywords": [
+    "asset",
+    "assets",
+    "css",
+    "image",
+    "inject",
+    "injector"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakemulley/assetinjector"
+  },
+  "author": "Jake Mulley <me@jakemulley.com> (https://jakemulley.com)",
+  "license": "MIT",
+  "dependencies": {
+    "deep-assign": "^2.0.0",
+    "q": "^1.4.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0"
+  }
+}
