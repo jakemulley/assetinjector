@@ -37,7 +37,7 @@ Edit your source file to contain comments where you'd like to inject these files
 ```
 And then `<link>` elements will be added inbetween the comments.
 
-Currently the module has support for JS and CSS files, but please (https://github.com/jakemulley/assetinjector/issues)[request another] if you'd like more.
+Currently the module has support for JS and CSS files, but please [request another](https://github.com/jakemulley/assetinjector/issues) if you'd like more.
 
 ### NPM
 ```
