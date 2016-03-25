@@ -8,7 +8,7 @@ npm i assetinjector --save-dev
 ```
 
 ## Options
-- `attributes` (object) - Add attributes to <link> or <script> tags
+- `attributes` (object) - Add attributes to `<link>` or `<script>` tags
 - `basePaths` (array) - List of folders with files inside to inject into the source file
 - `omit` (string) - A string to omit from the reference in the injection (useful if you output to a separate folder from assets)
 - `source` (string) - The source file that you want to inject into
