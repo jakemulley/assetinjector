@@ -33,10 +33,7 @@ module.exports = function(opts) {
     .then(generateAllReferences)
     .then(sortReferences)
     .then(inject)
-    .then(replaceInFile)
-    .then(function() {
-      console.log('Completed injecting assets.');
-    });
+    .then(replaceInFile);
 
 }
 
@@ -174,21 +171,6 @@ function listFiles(folderName, folderFiles) {
 
 }
 
-function sortReferences(references) {
-
-  var deferred = q.defer();
-
-  for (var i = references.length - 1; i >= 0; i--) {
-    sorted[references[i].type] = sorted[references[i].type] || [];
-    sorted[references[i].type].push(references[i].reference);
-  }
-
-  deferred.resolve(sorted);
-
-  return deferred.promise;
-
-}
-
 function replaceInFile(newSource) {
 
   var deferred = q.defer();
@@ -199,6 +181,21 @@ function replaceInFile(newSource) {
     }
     deferred.resolve();
   });
+
+  return deferred.promise;
+
+}
+
+function sortReferences(references) {
+
+  var deferred = q.defer();
+
+  for (var i = references.length - 1; i >= 0; i--) {
+    sorted[references[i].type] = sorted[references[i].type] || [];
+    sorted[references[i].type].push(references[i].reference);
+  }
+
+  deferred.resolve(sorted);
 
   return deferred.promise;
 
