@@ -14,7 +14,7 @@ npm i assetinjector --save-dev
 - `source` (string) - The source file that you want to inject into
 
 ### Defaults
-```json
+```
 attributes: {
   'css': {
     rel: 'stylesheet',
