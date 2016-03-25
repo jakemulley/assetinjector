@@ -28,6 +28,17 @@ source: './public/index.html'
 ```
 
 ## Usage
+
+### Editing the Source File
+Edit your source file to contain comments where you'd like to inject these files, and the semantic type should match the file extension you want to inject. For example, put this in your source file somewhere:
+```
+<!--inject:css-->
+<!--inject:stop-->
+```
+And then `<link>` elements will be added inbetween the comments.
+
+Currently the module has support for JS and CSS files, but please (https://github.com/jakemulley/assetinjector/issues)[request another] if you'd like more.
+
 ### NPM
 ```
 var injector = require('assetinjector');
