@@ -30,7 +30,7 @@ source: './public/index.html'
 ## Usage
 ### NPM
 ```
-var injector = require('./index');
+var injector = require('assetinjector');
 injector({source: './public/header.html'});
 ```
 
