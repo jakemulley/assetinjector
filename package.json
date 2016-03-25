@@ -12,7 +12,8 @@
     "css",
     "image",
     "inject",
-    "injector"
+    "injector",
+    "js"
   ],
   "repository": {
     "type": "git",
