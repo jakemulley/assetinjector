@@ -30,19 +30,24 @@ source: './public/index.html'
 ## Usage
 
 ### Editing the Source File
-Edit your source file to contain comments where you'd like to inject these files, and the semantic type should match the file extension you want to inject. For example, put this in your source file somewhere:
+Edit your source file to contain comments where you'd like to inject these files, and the semantic type should match the file extension you want to inject. For example:
 ```
+To inject CSS:
 <!--inject:css-->
 <!--inject:stop-->
+
+To inject JS:
+<!--inject:js-->
+<!--inject:stop-->
 ```
-And then `<link>` elements will be added inbetween the comments.
+And then appropriate elements will be added between the comments.
 
 Currently the module has support for JS and CSS files, but please [request another](https://github.com/jakemulley/assetinjector/issues) if you'd like more.
 
 ### NPM
 ```
 var injector = require('assetinjector');
-injector({source: './public/header.html'});
+injector({source: './public/header.html', basePaths: ['./public/_css', './public/_js']});
 ```
 
 ### Gulp
