@@ -22,7 +22,7 @@ attributes: {
   },
   'js': null
 },
-basePaths: ['./public/_css', './public/_js'],
+basePaths: [],
 omit: './public',
 source: './public/index.html'
 ```

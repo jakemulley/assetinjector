@@ -19,7 +19,7 @@ var defaultOptions = {
     },
     'js': null
   },
-  basePaths: ['./public/_css', './public/_js'],
+  basePaths: [],
   omit: './public',
   source: './public/index.html'
 };
@@ -105,7 +105,12 @@ var getFilesDeferred,
 function getFiles(folders) {
 
   getFilesDeferred = q.defer();
-  getFilesRemaining = folders.length;
+
+  if(!folders.length) {
+    getFilesDeferred.reject('No folders specified in your options.');
+  } else {
+    getFilesRemaining = folders.length;
+  }
 
   for (var i = folders.length - 1; i >= 0; i--) {
 
