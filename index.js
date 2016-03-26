@@ -1,9 +1,11 @@
 'use strict';
 
 // Required modules
-var deepAssign = require('deep-assign'),
-    fs         = require('fs'),
-    q          = require('q');
+var colors      = require('colors'),
+    deepAssign  = require('deep-assign'),
+    fs          = require('fs'),
+    performance = require('performance-now'),
+    q           = require('q');
 
 // Regular Expressions
 var matchBlock = /(<!--inject:([a-z]*)-->)(?:[^])*?(<!--inject:stop-->)/gm;
@@ -22,18 +24,23 @@ var defaultOptions = {
   source: './public/index.html'
 };
 
-var options;
-var fileList = [];
-var sorted = [];
+var options,
+    fileList = [],
+    sorted   = [],
+    start;
 
 module.exports = function(opts) {
+
+  start = performance();
 
   options = deepAssign(defaultOptions, opts);
   getFiles(options.basePaths)
     .then(generateAllReferences)
     .then(sortReferences)
     .then(inject)
-    .then(replaceInFile);
+    .then(replaceInFile)
+    .then(output)
+    .catch(output);
 
 }
 
@@ -77,14 +84,14 @@ function generateReference(type, path) {
   if(type == 'js') {
     deferred.resolve({
       type: 'js',
-      reference: '<script src="'+path+'"' + attributesString + '></script>'
+      reference: '<script src="'+path+'"' + attributesString + '></script>\n'
     });
   }
 
   if(type == 'css') {
     deferred.resolve({
       type: 'css',
-      reference: '<link href="'+path+'"' + attributesString + '>'
+      reference: '<link href="'+path+'"' + attributesString + '>\n'
     });
   }
 
@@ -109,10 +116,14 @@ function getFiles(folders) {
       fs.readdir(folderName, function(error, files) {
 
         if(error) {
-          deferred.reject(error);
+          getFilesDeferred.reject(error);
         }
 
-        listFiles(folderName, files);
+        if(typeof files != 'undefined') {
+          listFiles(folderName, files);
+        } else {
+          getFilesDeferred.reject('No files in folder ' + folderName);
+        }
 
       });
 
@@ -167,6 +178,20 @@ function listFiles(folderName, folderFiles) {
       getFilesDeferred.resolve(fileList);
     }
 
+  }
+
+}
+
+function output(error) {
+
+  var totalTime = (performance() - start).toFixed(2);
+
+  if(error) {
+    console.log('AssetInjector'.underline.red, '-'.red, 'took '.red + totalTime.red + 'ms'.red);
+    console.log('Error:'.red, error);
+  } else {
+    console.log('AssetInjector'.underline.green, '-'.green, 'took '.green + totalTime.green + 'ms'.green);
+    console.log('Assets successfully injected into'.green, options.source.green);
   }
 
 }
