@@ -84,14 +84,14 @@ function generateReference(type, path) {
   if(type == 'js') {
     deferred.resolve({
       type: 'js',
-      reference: '<script src="'+path+'"' + attributesString + '></script>\n'
+      reference: '<script src="'+path+'"' + attributesString + '></script>'
     });
   }
 
   if(type == 'css') {
     deferred.resolve({
       type: 'css',
-      reference: '<link href="'+path+'"' + attributesString + '>\n'
+      reference: '<link href="'+path+'"' + attributesString + '>'
     });
   }
 
@@ -185,12 +185,13 @@ function listFiles(folderName, folderFiles) {
 function output(error) {
 
   var totalTime = (performance() - start).toFixed(2);
+  var introString = 'AssetInjector - took ' + totalTime + 'ms';
 
   if(error) {
-    console.log('AssetInjector'.underline.red, '-'.red, 'took '.red + totalTime.red + 'ms'.red);
+    console.log(introString.red.underline);
     console.log('Error:'.red, error);
   } else {
-    console.log('AssetInjector'.underline.green, '-'.green, 'took '.green + totalTime.green + 'ms'.green);
+    console.log(introString.green.underline);
     console.log('Assets successfully injected into'.green, options.source.green);
   }
 
