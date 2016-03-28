@@ -176,8 +176,8 @@ function listFiles(folderName, folderFiles) {
 
   for (var i = folderFiles.length - 1; i >= 0; i--) {
 
-    getFilesRemaining--;
     fileList.push(folderName.replace(options.omit, '') + '/' + folderFiles[i]);
+    getFilesRemaining--;
 
     if(getFilesRemaining === 0) {
       getFilesDeferred.resolve(fileList);
