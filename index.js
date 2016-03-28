@@ -4,6 +4,7 @@
 var colors      = require('colors'),
     deepAssign  = require('deep-assign'),
     fs          = require('fs'),
+    path        = require('path'),
     performance = require('performance-now'),
     q           = require('q');
 
@@ -42,7 +43,7 @@ module.exports = function(opts) {
     .then(output)
     .catch(output);
 
-}
+};
 
 function generateAllReferences(fileList) {
 
@@ -102,6 +103,41 @@ function generateReference(type, path) {
 var getFilesDeferred,
     getFilesRemaining;
 
+function listFiles(folderName) {
+
+  fs.readdir(folderName, function(error, files) {
+
+    if(error) {
+      getFilesDeferred.reject(error);
+    }
+
+    if(typeof files != 'undefined') {
+
+      files.map(function(file) {
+        return path.join(folderName, file);
+      }).filter(function(file) {
+        return fs.statSync(file).isFile();
+      }).forEach(function(file) {
+
+        fileList.push(file.replace(options.omit, ''));
+        getFilesRemaining--;
+
+        if(getFilesRemaining === 0) {
+          getFilesDeferred.resolve(fileList);
+        }
+
+      });
+
+    } else {
+
+      getFilesDeferred.reject('No files in folder ' + folderName);
+
+    }
+
+  });
+
+}
+
 function getFiles(folders) {
 
   getFilesDeferred = q.defer();
@@ -113,27 +149,7 @@ function getFiles(folders) {
   }
 
   for (var i = folders.length - 1; i >= 0; i--) {
-
-    var folderName = folders[i];
-
-    (function(folderName) {
-
-      fs.readdir(folderName, function(error, files) {
-
-        if(error) {
-          getFilesDeferred.reject(error);
-        }
-
-        if(typeof files != 'undefined') {
-          listFiles(folderName, files);
-        } else {
-          getFilesDeferred.reject('No files in folder ' + folderName);
-        }
-
-      });
-
-    })(folderName);
-
+    listFiles(folders[i]);
   }
 
   return getFilesDeferred.promise;
@@ -170,21 +186,6 @@ function injectReplace(match, prefix, type, suffix) {
   }
 
   return (prefix) + matchedRefs.trim() + (suffix);
-}
-
-function listFiles(folderName, folderFiles) {
-
-  for (var i = folderFiles.length - 1; i >= 0; i--) {
-
-    fileList.push(folderName.replace(options.omit, '') + '/' + folderFiles[i]);
-    getFilesRemaining--;
-
-    if(getFilesRemaining === 0) {
-      getFilesDeferred.resolve(fileList);
-    }
-
-  }
-
 }
 
 function output(error) {
