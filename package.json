@@ -1,6 +1,6 @@
 {
   "name": "assetinjector",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Inject assets from a folder into a source file.",
   "main": "index.js",
   "scripts": {
