@@ -181,11 +181,18 @@ function injectReplace(match, prefix, type, suffix) {
 
   var matchedRefs = '';
 
-  for (var i = sorted[type].length - 1; i >= 0; i--) {
-    matchedRefs = matchedRefs + ' ' + sorted[type][i];
+  if(typeof sorted[type] !== 'undefined') {
+
+    for (var i = sorted[type].length - 1; i >= 0; i--) {
+      matchedRefs = matchedRefs + ' ' + sorted[type][i];
+    }
+
+    return (prefix) + matchedRefs.trim() + (suffix);
+
   }
 
-  return (prefix) + matchedRefs.trim() + (suffix);
+  return prefix + suffix;
+
 }
 
 function output(error) {
