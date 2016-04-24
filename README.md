@@ -23,8 +23,8 @@ attributes: {
   'js': null
 },
 basePaths: [],
-omit: './public',
-source: './public/index.html'
+omit: '',
+source: ''
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ Currently the module has support for JS and CSS files, but please [request anoth
 ### NPM
 ```
 var injector = require('assetinjector');
-injector({source: './public/header.html', basePaths: ['./public/_css', './public/_js']});
+injector({source: './public/header.html', basePaths: ['./public/_css', './public/_js'], omit: './public'});
 ```
 
 ### Gulp
