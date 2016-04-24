@@ -10,6 +10,7 @@ var colors      = require('colors'),
 
 // Regular Expressions
 var matchBlock = /(<!--inject:([a-z]*)-->)(?:[^])*?(<!--inject:stop-->)/gm;
+var indent = /^\s*/gm;
 
 // Default Options
 var defaultOptions = {
@@ -21,13 +22,12 @@ var defaultOptions = {
     'js': null
   },
   basePaths: [],
-  omit: './public',
-  source: './public/index.html'
+  omit: '',
+  source: ''
 };
 
 var options,
-    fileList = [],
-    sorted   = [],
+    listOfReferences = {},
     start;
 
 module.exports = function(opts) {
@@ -37,7 +37,6 @@ module.exports = function(opts) {
   options = deepAssign(defaultOptions, opts);
   getFiles(options.basePaths)
     .then(generateAllReferences)
-    .then(sortReferences)
     .then(inject)
     .then(replaceInFile)
     .then(output)
@@ -45,30 +44,38 @@ module.exports = function(opts) {
 
 };
 
-function generateAllReferences(fileList) {
+function generateAllReferences(files) {
 
   var deferred = q.defer();
-  var references = [];
-
-  for (var i = fileList.length - 1; i >= 0; i--) {
-
-    var type = fileList[i].substr(fileList[i].lastIndexOf('.') + 1);
-
-    generateReference(type, fileList[i]).then(function(reference) {
-      references.push(reference);
-    });
-
+  var fileCount = files.length;
+  if(!fileCount) {
+    deferred.reject('No files found to inject.');
   }
 
-  deferred.resolve(references);
+  files.forEach(function(file) {
+
+    var fileDetails = path.parse(file);
+    var ext = fileDetails.ext.substr(1);
+
+    if(!listOfReferences[ext]) {
+      listOfReferences[ext] = [];
+    }
+
+    listOfReferences[ext].push(generateReference(ext, file.replace(options.omit, '')));
+
+    fileCount--;
+
+    if(fileCount === 0) {
+      deferred.resolve(listOfReferences);
+    }
+
+  });
 
   return deferred.promise;
 
 }
 
 function generateReference(type, path) {
-
-  var deferred = q.defer();
 
   // Build extra attributes
   var attributesString = '';
@@ -83,77 +90,59 @@ function generateReference(type, path) {
   }
 
   if(type == 'js') {
-    deferred.resolve({
-      type: 'js',
-      reference: '<script src="'+path+'"' + attributesString + '></script>'
-    });
+    return '<script src="'+path+'"' + attributesString + '></script>';
   }
 
   if(type == 'css') {
-    deferred.resolve({
-      type: 'css',
-      reference: '<link href="'+path+'"' + attributesString + '>'
-    });
+    return '<link href="'+path+'"' + attributesString + '>';
   }
-
-  return deferred.promise;
-
-}
-
-var getFilesDeferred,
-    getFilesRemaining;
-
-function listFiles(folderName) {
-
-  fs.readdir(folderName, function(error, files) {
-
-    if(error) {
-      getFilesDeferred.reject(error);
-    }
-
-    if(typeof files != 'undefined') {
-
-      files.map(function(file) {
-        return path.join(folderName, file);
-      }).filter(function(file) {
-        return fs.statSync(file).isFile();
-      }).forEach(function(file) {
-
-        fileList.push(file.replace(options.omit, ''));
-        getFilesRemaining--;
-
-        if(getFilesRemaining === 0) {
-          getFilesDeferred.resolve(fileList);
-        }
-
-      });
-
-    } else {
-
-      getFilesDeferred.reject('No files in folder ' + folderName);
-
-    }
-
-  });
 
 }
 
 function getFiles(folders) {
 
-  getFilesDeferred = q.defer();
-
-  if(!folders.length) {
-    getFilesDeferred.reject('No folders specified in your options.');
-  } else {
-    getFilesRemaining = folders.length;
+  var deferred = q.defer();
+  var folderCount = folders.length;
+  var listOfFiles = [];
+  if(!folderCount) {
+    deferred.reject('No folders specified.');
   }
 
-  for (var i = folders.length - 1; i >= 0; i--) {
-    listFiles(folders[i]);
-  }
+  folders.forEach(function(folder) {
 
-  return getFilesDeferred.promise;
+    fs.readdir(folder, function(error, files) {
 
+      if(error) {
+        deferred.reject(error);
+      }
+
+      files.map(function(file) {
+        return path.join(folder, file);
+      }).filter(function(file) {
+        return fs.statSync(file).isFile();
+      }).filter(function(file) {
+        var fileDetails = path.parse(file);
+        return (fileDetails.ext != '.css' && fileDetails.ext != '.js') ? false : true;
+      }).forEach(function(file) {
+        listOfFiles.push(file);
+      });
+
+      folderCount--;
+
+      if(folderCount === 0) {
+        deferred.resolve(listOfFiles);
+      }
+
+    });
+
+  });
+
+  return deferred.promise;
+
+}
+
+function getIndentation(str) {
+  return str.match(indent)[1];
 }
 
 function inject(references) {
@@ -180,18 +169,17 @@ function inject(references) {
 function injectReplace(match, prefix, type, suffix) {
 
   var matchedRefs = '';
+  var indentation = getIndentation(match) ? getIndentation(match) : '    ';
 
-  if(typeof sorted[type] !== 'undefined') {
+  if(typeof listOfReferences[type] !== 'undefined') {
 
-    for (var i = sorted[type].length - 1; i >= 0; i--) {
-      matchedRefs = matchedRefs + ' ' + sorted[type][i];
-    }
-
-    return (prefix) + matchedRefs.trim() + (suffix);
+    listOfReferences[type].forEach(function(reference) {
+      matchedRefs = matchedRefs + '\n' + indentation + reference;
+    });
 
   }
 
-  return prefix + suffix;
+  return (prefix) + '\n' + indentation + matchedRefs.trim() + '\n' + indentation + (suffix);
 
 }
 
@@ -220,21 +208,6 @@ function replaceInFile(newSource) {
     }
     deferred.resolve();
   });
-
-  return deferred.promise;
-
-}
-
-function sortReferences(references) {
-
-  var deferred = q.defer();
-
-  for (var i = references.length - 1; i >= 0; i--) {
-    sorted[references[i].type] = sorted[references[i].type] || [];
-    sorted[references[i].type].push(references[i].reference);
-  }
-
-  deferred.resolve(sorted);
 
   return deferred.promise;
 
