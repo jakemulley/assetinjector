@@ -4,7 +4,7 @@
   "description": "Inject assets from a folder into a source file.",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test.js"
+    "test": "mocha --reporter spec test.js"
   },
   "keywords": [
     "asset",
